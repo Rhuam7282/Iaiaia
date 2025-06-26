@@ -1,252 +1,327 @@
-/* Estilização Dio Brando - Phantom Blood */
-
-body {
-    /* Fonte mais séria/clássica, remetendo à era vitoriana */
-    font-family: 'Georgia', serif;
+/* Reset e configurações básicas */
+* {
     margin: 0;
     padding: 0;
-    /* Fundo gradiente escuro e imponente (roxo para preto) */
-    background: linear-gradient(135deg, #4a0e4e, #1a001a, black);
-    color: #f0e6f0; /* Cor de texto padrão clara para contraste */
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: #ffffff;
+    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
+    padding: 20px;
 }
 
-.chat-wrapper {
-    /* Fundo escuro, quase preto, para o container principal */
-    background-color: #1c1c1c;
-    /* SEM border-radius */
-    border-radius: 0;
-    /* Borda preta grossa e definida */
-    border: 4px solid black;
-    /* Sombra dura amarela, estilo JoJo, deslocada */
-    box-shadow: 6px 6px 0px 0px #f0d000;
-    width: 90%;
-    max-width: 600px;
-    display: flex;
-    flex-direction: column;
+#app-container {
+    width: 100%;
+    max-width: 800px;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(255, 215, 0, 0.3);
+    border: 2px solid #ffd700;
     overflow: hidden;
-    height: 85vh; /* Um pouco mais alto talvez */
+    backdrop-filter: blur(10px);
 }
 
-h1 {
+/* Header */
+header {
+    background: linear-gradient(45deg, #ffd700, #ffed4e);
+    color: #1a1a2e;
+    padding: 30px;
     text-align: center;
-    padding: 12px 15px;
-    margin: 0;
-    /* Amarelo Dio para o título */
-    background-color: #f0d000;
-    /* Texto preto para máximo contraste */
-    color: black;
-    font-size: 1.4em; /* Um pouco maior e mais imponente */
-    font-weight: bold;
-    /* Letras maiúsculas e espaçamento para drama */
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    /* Borda inferior preta separando do chat */
-    border-bottom: 4px solid black;
-    /* SEM border-radius */
-    border-radius: 0;
+    position: relative;
+    overflow: hidden;
 }
 
+header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 10px,
+        rgba(255, 255, 255, 0.1) 10px,
+        rgba(255, 255, 255, 0.1) 20px
+    );
+    animation: shine 3s linear infinite;
+}
+
+@keyframes shine {
+    0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+    100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+}
+
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    margin-bottom: 10px;
+    position: relative;
+    z-index: 1;
+}
+
+header p {
+    font-size: 1.1rem;
+    opacity: 0.8;
+    position: relative;
+    z-index: 1;
+}
+
+/* Chat Container */
 #chat-container {
-    flex-grow: 1;
-    padding: 15px;
+    height: 400px;
     overflow-y: auto;
-    /* Fundo do chat um pouco mais claro que o wrapper, mas ainda escuro */
-    background-color: #2a2a2a;
-    display: flex;
-    flex-direction: column;
-    gap: 12px; /* Espaço entre mensagens */
-    border-bottom: 4px solid black; /* Separador antes da área de input */
+    padding: 20px;
+    background: rgba(26, 26, 46, 0.5);
+    border-top: 1px solid rgba(255, 215, 0, 0.3);
+    border-bottom: 1px solid rgba(255, 215, 0, 0.3);
 }
 
-/* Scrollbar (Opcional, mas adiciona ao tema) - Webkit browsers */
+/* Scrollbar personalizada */
 #chat-container::-webkit-scrollbar {
-    width: 12px;
+    width: 8px;
 }
 
 #chat-container::-webkit-scrollbar-track {
-    background: #2a2a2a;
-    border-left: 1px solid black;
+    background: rgba(255, 215, 0, 0.1);
+    border-radius: 4px;
 }
 
 #chat-container::-webkit-scrollbar-thumb {
-    background-color: #f0d000; /* Amarelo */
-    border: 2px solid black; /* Borda preta */
-}
-/* Scrollbar - Firefox */
-#chat-container {
-  scrollbar-width: thin;
-  scrollbar-color: #f0d000 #2a2a2a; /* Thumb e Track */
+    background: #ffd700;
+    border-radius: 4px;
 }
 
+#chat-container::-webkit-scrollbar-thumb:hover {
+    background: #ffed4e;
+}
 
+/* Mensagens */
 .message {
-    max-width: 85%; /* Mensagens podem ser um pouco mais largas */
-    padding: 10px 15px;
-    margin-bottom: 0; /* Usa o 'gap' do container */
-    /* SEM border-radius */
-    border-radius: 0;
-    line-height: 1.5;
+    margin-bottom: 15px;
+    padding: 15px;
+    border-radius: 15px;
+    max-width: 80%;
     word-wrap: break-word;
-    /* Borda preta definida para todas as mensagens */
-    border: 2px solid black;
-    /* Sombra interna sutil para dar profundidade (opcional) */
-    /* box-shadow: inset 0 0 5px rgba(0,0,0,0.4); */
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .user-message {
-    /* Cinza escuro para mensagens do usuário (menos importante) */
-    background-color: #4d4d4d;
-    color: #cccccc; /* Texto cinza claro */
-    align-self: flex-end;
-    /* Borda ligeiramente diferente para diferenciar? Ou manter preta? Manter preta. */
+    background: linear-gradient(135deg, #4a90e2, #357abd);
+    margin-left: auto;
+    border-bottom-right-radius: 5px;
+    box-shadow: 0 4px 8px rgba(74, 144, 226, 0.3);
 }
 
-.bot-message {
-    /* Roxo Dio para as respostas do bot */
-    background-color: #6a0dad; /* Roxo vibrante */
-    /* Texto Amarelo Dio */
-    color: #f0d000;
-    font-weight: bold; /* Respostas de Dio são importantes! */
-    align-self: flex-start;
-    /* Borda amarela destacando a fala de Dio */
-    border: 2px solid #f0d000;
-    /* Efeito de "poder", uma sombra roxa mais escura */
-    box-shadow: 3px 3px 5px rgba(74, 14, 78, 0.7);
+.ai-message {
+    background: linear-gradient(135deg, #ffd700, #ffed4e);
+    color: #1a1a2e;
+    margin-right: auto;
+    border-bottom-left-radius: 5px;
+    box-shadow: 0 4px 8px rgba(255, 215, 0, 0.3);
+    font-weight: 500;
 }
 
 .error-message {
-    /* Vermelho sangue escuro para erros */
-    background-color: #8b0000;
-    color: #ffdddd; /* Texto rosa pálido */
-    align-self: stretch;
-    text-align: center;
-    font-weight: bold;
-    border: 2px solid black;
-    padding: 12px;
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    margin-right: auto;
+    border-bottom-left-radius: 5px;
+    box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
 }
 
-#input-area {
+/* Input Container */
+#input-container {
+    padding: 20px;
+    background: rgba(26, 26, 46, 0.7);
     display: flex;
-    padding: 15px;
-    /* Mesmo fundo do wrapper */
-    background-color: #1c1c1c;
-    gap: 10px; /* Espaço entre input e botões */
+    gap: 10px;
+    align-items: center;
 }
 
 #message-input {
-    flex-grow: 1;
-    padding: 10px 15px;
-    /* Borda amarela forte */
-    border: 3px solid #f0d000;
-    /* SEM border-radius */
-    border-radius: 0;
-    font-size: 1em;
-    /* Fundo escuro */
-    background-color: #333;
-    /* Texto claro */
-    color: #eee;
-    font-family: 'Georgia', serif; /* Garantir a fonte */
+    flex: 1;
+    padding: 15px;
+    border: 2px solid #ffd700;
+    border-radius: 25px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.3s ease;
 }
 
 #message-input::placeholder {
-    color: #888;
-    font-style: italic;
+    color: rgba(255, 255, 255, 0.6);
 }
 
-#send-button, #reset-button {
-    padding: 10px 20px;
-    border: 3px solid black; /* Borda preta grossa */
-    /* SEM border-radius */
-    border-radius: 0;
-    color: black; /* Texto preto nos botões */
+#message-input:focus {
+    border-color: #ffed4e;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+button {
+    padding: 15px 25px;
+    border: none;
+    border-radius: 25px;
+    font-size: 1rem;
+    font-weight: 600;
     cursor: pointer;
-    font-size: 1em;
-    font-weight: bold;
-    transition: transform 0.1s ease, background-color 0.2s ease;
-    font-family: 'Georgia', serif;
-    text-transform: uppercase; /* Botões importantes */
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 #send-button {
-    /* Botão de enviar com o Roxo Dio */
-    background-color: #8a2be2; /* Um roxo um pouco mais claro para o botão */
-    color: #f0d000; /* Texto amarelo */
-}
-
-#reset-button {
-    /* Botão de reset com o Amarelo Dio */
-    background-color: #f0d000;
-    color: black; /* Texto preto */
+    background: linear-gradient(135deg, #ffd700, #ffed4e);
+    color: #1a1a2e;
 }
 
 #send-button:hover {
-    background-color: #9932cc; /* Roxo mais escuro no hover */
-    transform: translateY(-2px); /* Leve levantada */
+    background: linear-gradient(135deg, #ffed4e, #fff59d);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(255, 215, 0, 0.4);
 }
+
+#send-button:active {
+    transform: translateY(0);
+}
+
+#reset-button {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: #ffffff;
+}
+
 #reset-button:hover {
-    background-color: #ffd700; /* Amarelo mais brilhante no hover */
-     transform: translateY(-2px); /* Leve levantada */
+    background: linear-gradient(135deg, #c0392b, #a93226);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(231, 76, 60, 0.4);
 }
 
-
-#send-button:disabled, #reset-button:disabled {
-    background-color: #555; /* Cinza escuro quando desabilitado */
-    border-color: #444;
-    color: #888;
-    cursor: not-allowed;
-    transform: none;
+#reset-button:active {
+    transform: translateY(0);
 }
 
-.status {
-    padding: 8px 15px;
-    font-size: 0.9em;
-    color: #aaa; /* Status em cinza claro */
+/* Status Area */
+#status-area {
+    padding: 10px 20px;
     text-align: center;
-    min-height: 1.2em;
-    background-color: #1c1c1c; /* Mesmo fundo do wrapper/input area */
-    border-top: 1px dashed #555; /* Linha pontilhada separadora */
+    font-style: italic;
+    color: #ffd700;
+    min-height: 30px;
+    background: rgba(26, 26, 46, 0.3);
 }
 
-/* Indicador de "digitando" */
+/* Footer */
+footer {
+    padding: 15px;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.5);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+    
+    #app-container {
+        max-width: 100%;
+    }
+    
+    header h1 {
+        font-size: 2rem;
+    }
+    
+    #chat-container {
+        height: 300px;
+    }
+    
+    #input-container {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    #message-input {
+        width: 100%;
+    }
+    
+    button {
+        width: 100%;
+        padding: 12px;
+    }
+    
+    .message {
+        max-width: 95%;
+    }
+}
+
+@media (max-width: 480px) {
+    header h1 {
+        font-size: 1.8rem;
+    }
+    
+    header p {
+        font-size: 1rem;
+    }
+    
+    #chat-container {
+        height: 250px;
+        padding: 15px;
+    }
+    
+    .message {
+        padding: 12px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Animações especiais para o tema Dio */
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.ai-message:hover {
+    animation: pulse 1s ease-in-out;
+}
+
+/* Efeito de digitação */
 .typing-indicator {
-    /* Herda o estilo .bot-message, mas remove sombra/borda específica se necessário */
-    box-shadow: none;
-    border: 2px solid #f0d000; /* Borda amarela */
-    padding: 12px 15px; /* Ajustar padding para os pontos */
-}
-
-.typing-indicator span {
     display: inline-block;
-    width: 10px; /* Pontos maiores */
-    height: 10px;
-    margin: 0 3px;
-    /* Pontos amarelos */
-    background-color: #f0d000;
-    /* SEM border-radius (pontos quadrados?) ou manter redondo? Redondo é mais padrão */
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
-    border: 1px solid black; /* Borda preta nos pontos */
-    animation: typing 1.2s infinite ease-in-out;
+    background: #ffd700;
+    animation: typing 1.4s infinite ease-in-out;
 }
 
-.typing-indicator span:nth-child(2) {
-    animation-delay: 0.2s;
-}
-
-.typing-indicator span:nth-child(3) {
-    animation-delay: 0.4s;
-}
+.typing-indicator:nth-child(1) { animation-delay: -0.32s; }
+.typing-indicator:nth-child(2) { animation-delay: -0.16s; }
 
 @keyframes typing {
-    0%, 100% {
-        opacity: 0.4;
-        transform: translateY(0);
+    0%, 80%, 100% {
+        transform: scale(0);
+        opacity: 0.5;
     }
-    50% {
+    40% {
+        transform: scale(1);
         opacity: 1;
-        transform: translateY(-4px);
     }
 }
+

@@ -1,177 +1,262 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const chatContainer = document.getElementById('chat-container');
-    const messageInput = document.getElementById('message-input');
-    const sendButton = document.getElementById('send-button');
-    const resetButton = document.getElementById('reset-button');
-    const statusArea = document.getElementById('status-area');
+document.addEventListener("DOMContentLoaded", () => {
+  const chatContainer = document.getElementById("chat-container");
+  const messageInput = document.getElementById("message-input");
+  const sendButton = document.getElementById("send-button");
+  const resetButton = document.getElementById("reset-button");
+  const statusArea = document.getElementById("status-area");
 
-    // --- Funções Auxiliares ---
+  // Configuração do backend (será atualizada para a URL do Render no deploy)
+  const backendUrl = window.location.origin; // Para desenvolvimento local e produção
 
-    function addMessage(message, sender) {
-        const messageDiv = document.createElement('div');
-        messageDiv.classList.add('message', `${sender}-message`);
+  // Variáveis para controle de sessão
+  let currentSessionId = `sessao_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+  let chatStartTime = new Date();
+  let chatHistory = [];
 
-        // Simples sanitização para evitar injeção básica de HTML
-        // Para segurança robusta, bibliotecas como DOMPurify seriam recomendadas
-        const textNode = document.createTextNode(message);
-        messageDiv.appendChild(textNode);
+  // --- Funções Auxiliares ---
 
-        chatContainer.appendChild(messageDiv);
-        // Rola para a mensagem mais recente
-        scrollToBottom();
+  function addMessage(message, sender) {
+    const messageDiv = document.createElement("div");
+    messageDiv.classList.add("message", `${sender}-message`);
+
+    // Sanitização básica
+    const textNode = document.createTextNode(message);
+    messageDiv.appendChild(textNode);
+
+    chatContainer.appendChild(messageDiv);
+    scrollToBottom();
+  }
+
+  function addErrorMessage(message) {
+    const errorDiv = document.createElement("div");
+    errorDiv.classList.add("message", "error-message");
+    errorDiv.textContent = `Erro: ${message}`;
+    chatContainer.appendChild(errorDiv);
+    scrollToBottom();
+  }
+
+  function scrollToBottom() {
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+  }
+
+  function showTypingIndicator() {
+    const typingDiv = document.createElement("div");
+    typingDiv.classList.add("message", "ai-message");
+    typingDiv.id = "typing-indicator";
+    typingDiv.innerHTML = `
+      <span class="typing-indicator"></span>
+      <span class="typing-indicator"></span>
+      <span class="typing-indicator"></span>
+      Dio-sama está pensando...
+    `;
+    chatContainer.appendChild(typingDiv);
+    scrollToBottom();
+  }
+
+  function removeTypingIndicator() {
+    const typingIndicator = document.getElementById("typing-indicator");
+    if (typingIndicator) {
+      typingIndicator.remove();
     }
+  }
 
-    function addErrorMessage(message) {
-        const errorDiv = document.createElement('div');
-        errorDiv.classList.add('message', 'error-message');
-        errorDiv.textContent = `Erro: ${message}`;
-        chatContainer.appendChild(errorDiv);
-        scrollToBottom();
+  // --- Funções de API ---
+
+  async function getUserInfo() {
+    try {
+      const response = await fetch(`${backendUrl}/api/user-info`);
+      if (!response.ok) {
+        throw new Error("Falha ao obter informações do usuário");
+      }
+      return await response.json();
+    } catch (error) {
+      console.error("Erro ao obter informações do usuário:", error);
+      return { ip: "127.0.0.1", timestamp: new Date().toISOString() };
     }
+  }
 
-    function showTypingIndicator() {
-        hideTypingIndicator(); // Garante que não haja múltiplos indicadores
-        const typingDiv = document.createElement('div');
-        typingDiv.classList.add('message', 'bot-message', 'typing-indicator');
-        typingDiv.innerHTML = '<span></span><span></span><span></span>'; // Pontinhos animados
-        typingDiv.id = 'typing-indicator'; // ID para fácil remoção
-        chatContainer.appendChild(typingDiv);
-        scrollToBottom();
+  async function registrarConexaoUsuario() {
+    try {
+      const userInfo = await getUserInfo();
+      const logData = {
+        ip: userInfo.ip,
+        acao: "acesso_inicial_chatbot"
+      };
+
+      const response = await fetch(`${backendUrl}/api/log-connection`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(logData)
+      });
+
+      if (!response.ok) {
+        console.error("Falha ao registrar conexão:", await response.text());
+      } else {
+        const result = await response.json();
+        console.log("Conexão registrada:", result.message);
+      }
+    } catch (error) {
+      console.error("Erro ao registrar conexão:", error);
     }
+  }
 
-    function hideTypingIndicator() {
-        const indicator = document.getElementById('typing-indicator');
-        if (indicator) {
-            indicator.remove();
-        }
+  async function registrarAcessoBotParaRanking(botId, nomeBot) {
+    try {
+      const dataRanking = {
+        botId: botId,
+        nomeBot: nomeBot,
+        timestampAcesso: new Date().toISOString()
+      };
+
+      const response = await fetch(`${backendUrl}/api/ranking/registrar-acesso-bot`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dataRanking)
+      });
+
+      if (!response.ok) {
+        console.error("Falha ao registrar acesso para ranking:", await response.text());
+      } else {
+        const result = await response.json();
+        console.log("Registro de ranking:", result.message);
+      }
+    } catch (error) {
+      console.error("Erro ao registrar acesso para ranking:", error);
     }
+  }
 
-    function scrollToBottom() {
-        chatContainer.scrollTop = chatContainer.scrollHeight;
+  async function salvarHistoricoSessao(sessionId, botId, startTime, endTime, messages) {
+    try {
+      const payload = {
+        sessionId,
+        botId,
+        startTime: startTime.toISOString(),
+        endTime: endTime.toISOString(),
+        messages
+      };
+
+      const response = await fetch(`${backendUrl}/api/chat/salvar-historico`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error("Falha ao salvar histórico:", errorData.error || response.statusText);
+      } else {
+        const result = await response.json();
+        console.log("Histórico de sessão enviado:", result.message);
+      }
+    } catch (error) {
+      console.error("Erro ao enviar histórico de sessão:", error);
     }
+  }
 
-    function setStatus(message, isError = false) {
-        statusArea.textContent = message;
-        statusArea.style.color = isError ? '#c62828' : '#666';
+  // --- Lógica do Chat ---
+
+  async function sendMessage() {
+    const message = messageInput.value.trim();
+    if (!message) return;
+
+    addMessage(message, "user");
+    messageInput.value = "";
+    showTypingIndicator();
+    statusArea.textContent = "Dio-sama está formulando sua resposta...";
+
+    try {
+      const response = await fetch(`${backendUrl}/api/chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ 
+          message,
+          chatHistory 
+        }),
+      });
+
+      removeTypingIndicator();
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Erro desconhecido da API");
+      }
+
+      const data = await response.json();
+      addMessage(data.response, "ai");
+      
+      // Atualizar histórico
+      chatHistory = data.historico || chatHistory;
+      
+      // Salvar histórico da sessão
+      await salvarHistoricoSessao(
+        currentSessionId, 
+        "chatbotDioSama", 
+        chatStartTime, 
+        new Date(), 
+        chatHistory
+      );
+
+    } catch (error) {
+      removeTypingIndicator();
+      console.error("Erro ao enviar mensagem:", error);
+      addErrorMessage(error.message);
+    } finally {
+      statusArea.textContent = "";
     }
+  }
 
-    function clearStatus() {
-        statusArea.textContent = '';
+  function resetChat() {
+    chatContainer.innerHTML = "";
+    chatHistory = [];
+    currentSessionId = `sessao_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    chatStartTime = new Date();
+    addMessage("MUDA MUDA MUDA! Você ousa falar com o grande Dio-sama! Faça sua pergunta, mortal insignificante!", "ai");
+  }
+
+  // --- Event Listeners ---
+
+  sendButton.addEventListener("click", sendMessage);
+
+  messageInput.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+      sendMessage();
     }
+  });
 
-    function disableInput(disabled = true) {
-        messageInput.disabled = disabled;
-        sendButton.disabled = disabled;
-        resetButton.disabled = disabled; // Desabilita reset durante envio
+  resetButton.addEventListener("click", resetChat);
+
+  // --- Inicialização ---
+
+  window.addEventListener("load", async () => {
+    // Registrar conexão do usuário
+    await registrarConexaoUsuario();
+    
+    // Registrar acesso ao bot para ranking
+    await registrarAcessoBotParaRanking("chatbotDioSama", "Dio-Sama Chatbot");
+    
+    // Mensagem de boas-vindas inicial
+    addMessage("WRYYY! Você ousa se aproximar de mim, Dio-sama? Muito bem, mortal... Faça sua pergunta e talvez eu conceda minha sabedoria suprema!", "ai");
+  });
+
+  // Salvar histórico quando a página for fechada
+  window.addEventListener("beforeunload", () => {
+    if (chatHistory.length > 0) {
+      // Usar sendBeacon para envio assíncrono
+      const payload = {
+        sessionId: currentSessionId,
+        botId: "chatbotDioSama",
+        startTime: chatStartTime.toISOString(),
+        endTime: new Date().toISOString(),
+        messages: chatHistory
+      };
+      
+      navigator.sendBeacon(
+        `${backendUrl}/api/chat/salvar-historico`,
+        JSON.stringify(payload)
+      );
     }
+  });
+});
 
-    // --- Lógica Principal ---
-
-    async function sendMessage() {
-        const messageText = messageInput.value.trim();
-        if (!messageText) return; // Não envia mensagens vazias
-
-        // Mostra a mensagem do usuário na UI
-        addMessage(messageText, 'user');
-        messageInput.value = ''; // Limpa o input
-        disableInput(true); // Desabilita input enquanto espera a resposta
-        showTypingIndicator(); // Mostra "digitando..."
-        setStatus('Enviando...');
-
-        try {
-            // Envia a mensagem para o backend
-            const response = await fetch('/chat', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ message: messageText }),
-            });
-
-            hideTypingIndicator(); // Esconde "digitando..."
-
-            if (!response.ok) {
-                // Tenta pegar a mensagem de erro do JSON, senão usa o status text
-                let errorMsg = `Falha ao buscar resposta (${response.status} ${response.statusText})`;
-                try {
-                    const errorData = await response.json();
-                    errorMsg = errorData.error || errorMsg; // Usa a mensagem de erro do backend se disponível
-                } catch (jsonError) {
-                    // Ignora se não conseguir parsear o JSON de erro
-                    console.error("Não foi possível parsear JSON de erro:", jsonError);
-                }
-                throw new Error(errorMsg);
-            }
-
-            const data = await response.json();
-
-            // Mostra a resposta do bot na UI
-            addMessage(data.response, 'bot');
-            clearStatus();
-
-        } catch (error) {
-            console.error('Erro ao enviar/receber mensagem:', error);
-            hideTypingIndicator(); // Garante que o indicador suma em caso de erro
-            addErrorMessage(error.message || 'Não foi possível conectar ao servidor.');
-            setStatus('Erro ao enviar mensagem.', true);
-        } finally {
-             disableInput(false); // Reabilita o input
-             messageInput.focus(); // Coloca o foco de volta no input
-        }
-    }
-
-     async function resetChatHistory() {
-        if (!confirm("Tem certeza que deseja limpar o histórico desta conversa no servidor?")) {
-            return;
-        }
-
-        disableInput(true);
-        setStatus('Resetando histórico...');
-
-        try {
-            const response = await fetch('/reset', { method: 'POST' });
-
-            if (!response.ok) {
-                 throw new Error(`Falha ao resetar (${response.status})`);
-            }
-
-            const data = await response.json();
-            chatContainer.innerHTML = ''; // Limpa a tela do chat
-            addMessage("Vamos começar denovo... inútil", 'bot'); // Mensagem inicial
-            setStatus(data.message || "Histórico resetado.");
-            console.log("Histórico resetado pelo cliente.");
-
-
-        } catch (error) {
-            console.error("Erro ao resetar histórico:", error);
-            addErrorMessage("Não foi possível resetar o histórico no servidor.");
-             setStatus('Erro ao resetar.', true);
-        } finally {
-             disableInput(false);
-             messageInput.focus();
-             // Não limpa o status aqui, mantém a mensagem de sucesso/erro do reset
-             setTimeout(clearStatus, 7282); // Limpa status após 3s
-        }
-    }
-
-
-    // --- Event Listeners ---
-
-    // Enviar mensagem ao clicar no botão
-    sendButton.addEventListener('click', sendMessage);
-
-    // Enviar mensagem ao pressionar Enter no input
-    messageInput.addEventListener('keypress', (event) => {
-        if (event.key === 'Enter') {
-            sendMessage();
-        }
-    });
-
-    // Resetar histórico
-    resetButton.addEventListener('click', resetChatHistory);
-
-     // Foco inicial no input
-    messageInput.focus();
-    scrollToBottom(); // Garante que a visualização comece no fim ao carregar
-
-}); // Fim do DOMContentLoaded
