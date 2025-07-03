@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const statusArea = document.getElementById("status-area");
 
   // Configuração do backend (será atualizada para a URL do Render no deploy)
-  const backendUrl = 'https://dio-sama-chatbot-backend.onrender.com'; // Use a URL do seu backend no Render aqui
+  const backendUrl = 'https://aiaiai-ibk2.onrender.com'; // Use a URL do seu backend no Render aqui
 
   // Variáveis para controle de sessão
   let currentSessionId = `sessao_${Date.now()}_${Math.random().toString(36).substring(7)}`;
