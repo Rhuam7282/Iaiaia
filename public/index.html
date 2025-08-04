@@ -10,14 +10,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div id="app-container">
-        <header>
-            <h1>Fale com Dio-Sama</h1>
-            <p>O ser supremo irá lhe conceder sua sabedoria</p>
-        </header>
-        <div id="chat-container">
-            <!-- As mensagens do chat serão inseridas aqui -->
+    <!-- Tela de Apresentação (Splash Screen) -->
+    <div id="splash-screen">
+        <div class="splash-content">
+            <h1>Bem-vindo ao Reino de Dio-Sama</h1>
+            <p>O vampiro supremo aguarda para compartilhar sua sabedoria infinita</p>
+            <button id="start-chat-button">Falar com Dio-Sama</button>
         </div>
+<<<<<<< HEAD
+=======
         <div id="input-container">
             <input type="text" id="message-input" placeholder="Faça sua pergunta ao grande Dio-sama...">
             <button id="send-button">Enviar</button>
@@ -27,8 +28,43 @@
         <footer>
             <p>Criado por RhuamzinnduPlay - Inspirado em JoJo's Bizarre Adventure</p>
         </footer>
+>>>>>>> 9d1c67de636a6c33e20de079e008e4ebe2f763a9
     </div>
+
+    <!-- Interface Principal do Chat -->
+    <div id="app-container" style="display: none;">
+        <!-- Histórico de Conversas -->
+        <aside id="chat-history-sidebar">
+            <div class="history-header">
+                <h3>Conversas Anteriores</h3>
+                <button id="refresh-history-button">🔄</button>
+            </div>
+            <ul id="history-list">
+                <!-- Lista de históricos será preenchida via JavaScript -->
+            </ul>
+        </aside>
+
+        <main class="chat-main">
+            <header>
+                <h1>Fale com Dio-Sama</h1>
+                <p>O ser supremo irá lhe conceder sua sabedoria</p>
+            </header>
+            <div id="chat-container">
+                <!-- As mensagens do chat serão inseridas aqui -->
+            </div>
+            <div id="input-container">
+                <input type="text" id="message-input" placeholder="Faça sua pergunta ao grande Dio-sama...">
+                <button id="send-button">Enviar</button>
+                <button id="reset-button">Nova Conversa</button>
+            </div>
+            <div id="status-area"></div>
+        </main>
+    </div>
+
+    <footer>
+        <p>Criado por RhuamzinnduPlay - Inspirado em JoJo's Bizarre Adventure</p>
+    </footer>
+
     <script src="client.js"></script>
 </body>
 </html>
-

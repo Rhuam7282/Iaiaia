@@ -1,10 +1,24 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // Elementos da splash screen
+  const splashScreen = document.getElementById("splash-screen");
+  const startChatButton = document.getElementById("start-chat-button");
+  const appContainer = document.getElementById("app-container");
+
+  // Elementos do chat
   const chatContainer = document.getElementById("chat-container");
   const messageInput = document.getElementById("message-input");
   const sendButton = document.getElementById("send-button");
   const resetButton = document.getElementById("reset-button");
   const statusArea = document.getElementById("status-area");
 
+<<<<<<< HEAD
+  // Elementos do histórico
+  const chatHistorySidebar = document.getElementById("chat-history-sidebar");
+  const historyList = document.getElementById("history-list");
+  const refreshHistoryButton = document.getElementById("refresh-history-button");
+
+=======
+>>>>>>> 9d1c67de636a6c33e20de079e008e4ebe2f763a9
   // Configuração do backend
   const backendUrl = 'https://aiaiai-ibk2.onrender.com'; // URL do backend no Render
 
@@ -12,8 +26,115 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentSessionId = `sessao_${Date.now()}_${Math.random().toString(36).substring(7)}`;
   let chatStartTime = new Date();
   let chatHistory = [];
+  let isLoadingHistory = false;
 
-  // --- Funções Auxiliares ---
+  // --- Funções da Splash Screen ---
+
+  function showChatInterface() {
+    splashScreen.style.display = "none";
+    appContainer.style.display = "flex";
+    
+    // Carregar histórico de conversas
+    loadChatHistory();
+    
+    // Mensagem de boas-vindas inicial
+    addMessage("WRYYY! Você ousa se aproximar de mim, Dio-sama? Muito bem, mortal... Faça sua pergunta e talvez eu conceda minha sabedoria suprema! Posso até mesmo revelar os segredos do clima e do tempo de qualquer lugar do mundo!", "bot");
+  }
+
+  // --- Funções do Histórico ---
+
+  async function loadChatHistory() {
+    try {
+      const response = await fetch(`${backendUrl}/api/chat/historicos?limit=10`);
+      if (!response.ok) {
+        throw new Error("Falha ao carregar histórico");
+      }
+      
+      const data = await response.json();
+      displayHistoryList(data.historicos);
+    } catch (error) {
+      console.error("Erro ao carregar histórico:", error);
+      // Não mostrar erro para o usuário, apenas log
+    }
+  }
+
+  function displayHistoryList(historicos) {
+    historyList.innerHTML = "";
+    
+    if (historicos.length === 0) {
+      const emptyItem = document.createElement("li");
+      emptyItem.textContent = "Nenhuma conversa anterior";
+      emptyItem.classList.add("empty-history");
+      historyList.appendChild(emptyItem);
+      return;
+    }
+
+    historicos.forEach(hist => {
+      const listItem = document.createElement("li");
+      listItem.classList.add("history-item");
+      listItem.dataset.sessionId = hist.sessionId;
+      
+      const date = new Date(hist.startTime).toLocaleDateString('pt-BR');
+      const time = new Date(hist.startTime).toLocaleTimeString('pt-BR', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      });
+      
+      listItem.innerHTML = `
+        <div class="history-preview">${hist.preview}</div>
+        <div class="history-date">${date} ${time}</div>
+      `;
+      
+      listItem.addEventListener("click", () => loadSpecificChat(hist.sessionId));
+      historyList.appendChild(listItem);
+    });
+  }
+
+  async function loadSpecificChat(sessionId) {
+    if (isLoadingHistory) return;
+    
+    try {
+      isLoadingHistory = true;
+      statusArea.textContent = "Carregando conversa...";
+      
+      const response = await fetch(`${backendUrl}/api/chat/historico/${sessionId}`);
+      if (!response.ok) {
+        throw new Error("Falha ao carregar conversa específica");
+      }
+      
+      const data = await response.json();
+      
+      // Limpar chat atual
+      chatContainer.innerHTML = "";
+      
+      // Atualizar variáveis de sessão
+      currentSessionId = data.sessionId;
+      chatStartTime = new Date(data.startTime);
+      chatHistory = data.messages;
+      
+      // Exibir mensagens da conversa carregada
+      data.messages.forEach(msg => {
+        const sender = msg.role === 'user' ? 'user' : 'bot';
+        addMessage(msg.parts[0].text, sender);
+      });
+      
+      statusArea.textContent = "Conversa carregada! Você pode continuar de onde parou.";
+      setTimeout(() => {
+        statusArea.textContent = "";
+      }, 3000);
+      
+    } catch (error) {
+      console.error("Erro ao carregar conversa específica:", error);
+      statusArea.textContent = "Erro ao carregar conversa.";
+      setTimeout(() => {
+        statusArea.textContent = "";
+      }, 3000);
+    } finally {
+      isLoadingHistory = false;
+    }
+  }
+
+  // --- Funções Auxiliares do Chat (mantidas do código original) ---
 
   function addMessage(message, sender) {
     const messageDiv = document.createElement("div");
@@ -60,7 +181,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // --- Funções de API ---
+  // --- Funções de API (mantidas do código original) ---
 
   async function getUserInfo() {
     try {
@@ -147,17 +268,19 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         const result = await response.json();
         console.log("Histórico de sessão enviado:", result.message);
+        // Atualizar lista de históricos após salvar
+        loadChatHistory();
       }
     } catch (error) {
       console.error("Erro ao enviar histórico de sessão:", error);
     }
   }
 
-  // --- Lógica do Chat ---
+  // --- Lógica do Chat (mantida do código original) ---
 
   async function sendMessage() {
     const message = messageInput.value.trim();
-    if (!message) return;
+    if (!message || isLoadingHistory) return;
 
     addMessage(message, "user");
     messageInput.value = "";
@@ -217,6 +340,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- Event Listeners ---
 
+  // Splash screen
+  startChatButton.addEventListener("click", showChatInterface);
+
+  // Chat
   sendButton.addEventListener("click", sendMessage);
 
   messageInput.addEventListener("keypress", (e) => {
@@ -227,6 +354,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   resetButton.addEventListener("click", resetChat);
 
+  // Histórico
+  refreshHistoryButton.addEventListener("click", loadChatHistory);
+
   // --- Inicialização ---
 
   window.addEventListener("load", async () => {
@@ -235,9 +365,12 @@ document.addEventListener("DOMContentLoaded", () => {
     
     // Registrar acesso ao bot para ranking
     await registrarAcessoBotParaRanking("chatbotDioSama", "Dio-Sama Chatbot");
+<<<<<<< HEAD
+=======
     
     // Mensagem de boas-vindas inicial
     addMessage("WRYYY! Você ousa se aproximar de mim, Dio-sama? Muito bem, mortal... Faça sua pergunta e talvez eu conceda minha sabedoria suprema! Posso até mesmo revelar os segredos do clima e do tempo de qualquer lugar do mundo!", "bot");
+>>>>>>> 9d1c67de636a6c33e20de079e008e4ebe2f763a9
   });
 
   // Salvar histórico quando a página for fechada
@@ -259,4 +392,3 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
-
