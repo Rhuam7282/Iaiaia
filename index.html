@@ -3,35 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dio-Sama Chatbot</title>
+    <title>Dio-Sama Chatbot - KONO DIO DA!</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <meta name="description" content="Converse com Dio-Sama! Chatbot com IA avançada, previsão do tempo e muito mais!">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👑</text></svg>">
 </head>
 <body>
     <div id="app-container">
         <header>
-            <h1>DIO-SAMA CHATBOT</h1>
+            <h1>DIOMINI</h1>
             <div class="controls">
-                <button id="history-button">Histórico</button>
-                <button id="reset-button">Nova Conversa</button>
+                <button id="history-button" title="Ver histórico de conversas">📚 Histórico</button>
+                <button id="reset-button" title="Iniciar nova conversa">🆕 Nova Conversa</button>
             </div>
         </header>
         
-        <div id="history-panel" class="history-panel"></div>
+        <div id="history-panel" class="history-panel">
+            <h3 style="color: var(--dio-yellow); margin-top: 0; text-align: center;">📚 Histórico de Conversas</h3>
+            <!-- Histórico será carregado aqui -->
+        </div>
         
         <div id="chat-container">
             <!-- Mensagens serão inseridas aqui -->
         </div>
         
         <div id="input-container">
-            <input type="text" id="message-input" placeholder="Pergunte ao Dio-sama...">
-            <button id="send-button">Enviar</button>
+            <input 
+                type="text" 
+                id="message-input" 
+                placeholder="Pergunte ao Dio-sama sobre clima, horário ou qualquer coisa..."
+                maxlength="500"
+                autocomplete="off"
+            >
+            <button id="send-button" title="Enviar mensagem">📤 Enviar</button>
         </div>
         
         <footer>
-            <p>Poder do Dio-sama: Gemini AI + MongoDB</p>
+            <p>⚡ Poder do Dio-sama: Gemini AI + MongoDB + OpenWeather API ⚡</p>
+            <p style="font-size: 0.7rem; margin-top: 5px; opacity: 0.7;">
+                🌤️ Consulte o clima | ⏰ Saiba o horário | 💬 Converse com IA avançada
+            </p>
+            <p>Um projeto feito pelas lágrimas de Rhuam7282, junto com o poder do Deepseek e Manus IA</p>
         </footer>
     </div>
+    
+    <script>
+        // Configuração do ambiente
+        if (typeof process === 'undefined') {
+            window.process = { env: {} };
+        }
+        
+        // Detectar se está em desenvolvimento ou produção
+        const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        window.process.env.REACT_APP_BACKEND_URL = isDevelopment 
+            ? 'http://localhost:7281' 
+            : 'https://aiaiai-ibk2.onrender.com';
+    </script>
     <script src="client.js"></script>
 </body>
 </html>
+
