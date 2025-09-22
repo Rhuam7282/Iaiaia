@@ -11,6 +11,13 @@
   --hq-highlight: #FFFFFF;
 }
 
+.jim-nightshade-regular {
+  font-family: "Jim Nightshade", cursive;
+  font-weight: 400;
+  font-style: normal;
+}
+
+
 /* Estilo geral no formato HQ */
 body {
   background-color: var(--shadow-dark);
@@ -26,6 +33,7 @@ body {
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
+  font-family: "Jim Nightshade", cursive;
 }
 
 /* Efeito de retícula (meio-tom) como nas HQs */
