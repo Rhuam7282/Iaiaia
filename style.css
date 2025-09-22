@@ -438,3 +438,64 @@ footer p {
   color: var(--jojo-sand);
   font-style: italic;
 }
+/* Adicione ao final do style.css */
+
+/* Modal de Login */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.7);
+}
+
+.modal-content {
+    background: linear-gradient(135deg, var(--dark-red) 0%, var(--blood-red) 100%);
+    margin: 15% auto;
+    padding: 20px;
+    border: 3px solid var(--dio-yellow);
+    width: 300px;
+    border-radius: 5px;
+    position: relative;
+}
+
+.close {
+    color: var(--dio-yellow);
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover {
+    color: var(--jojo-sand);
+}
+
+.modal-content h3 {
+    color: var(--dio-yellow);
+    margin-top: 0;
+}
+
+.modal-content input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    background: var(--jojo-sand);
+    color: var(--shadow-dark);
+    border: 2px solid var(--shadow-dark);
+    box-sizing: border-box;
+}
+
+.modal-content button {
+    width: 100%;
+}
+
+#login-message {
+    margin-top: 10px;
+    text-align: center;
+    color: var(--dio-yellow);
+    font-weight: bold;
+}
