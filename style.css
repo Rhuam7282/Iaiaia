@@ -24,7 +24,6 @@ body {
   background-image: 
     radial-gradient(circle at 10% 20%, rgba(139, 0, 0, 0.2) 0%, transparent 20%),
     radial-gradient(circle at 90% 80%, rgba(139, 0, 0, 0.2) 0%, transparent 20%);
-  font-family: 'Roboto', sans-serif;
   margin: 0;
   padding: 0;
   color: var(--text-light);
@@ -360,7 +359,7 @@ button:hover::before {
   border: 3px solid var(--shadow-dark);
   background-color: var(--jojo-sand);
   color: var(--shadow-dark);
-  font-family: 'Roboto', sans-serif;
+  font-family: "Jim Nightshade", cursive;
   font-size: 1rem;
   border-radius: 0;
   box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.2);
