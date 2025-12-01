@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dio-Sama Chatbot - KONO DIO DA!</title>
+    <title>DIOMINI - Chatbot do Dio-Sama | KONO DIO DA!</title>
     <link rel="stylesheet" href="style.css" />
     <link
       href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
@@ -11,11 +11,7 @@
     />
     <meta
       name="description"
-      content="Converse com Dio-Sama! Chatbot com IA avançada, previsão do tempo e muito mais!"
-    />
-    <link
-      rel="icon"
-      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧛</text></svg>"
+      content="Converse com Dio-Sama! Chatbot com IA avançada, previsão do tempo e muito mais! WRYYY!"
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -23,56 +19,116 @@
       href="https://fonts.googleapis.com/css2?family=Jim+Nightshade&display=swap"
       rel="stylesheet"
     />
+    <!-- Favicon melhorado -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🧛%3C/text%3E%3C/svg%3E">
   </head>
   <body>
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+      <div class="loading-spinner"></div>
+      <p>Carregando o poder do Dio-sama...</p>
+    </div>
+
     <div id="app-container">
       <header>
-        <h1>DIOMINI</h1>
+        <h1>
+          <span class="title-icon">🧛‍♂️</span>
+          DIOMINI
+          <span class="title-icon">⚡</span>
+        </h1>
+        <p class="subtitle">O Chatbot Mais Arrogante do Universo</p>
         <div class="controls">
-          <button id="history-button" title="Ver histórico de conversas">
+          <button id="history-button" title="Ver histórico de conversas" aria-label="Abrir histórico de conversas">
             📚 Histórico
           </button>
-          <button id="reset-button" title="Iniciar nova conversa">
+          <button id="reset-button" title="Iniciar nova conversa" aria-label="Iniciar nova conversa">
             🆕 Nova Conversa
           </button>
-          <button id="admin-login-button" title="Login de Administrador">
+          <button id="admin-login-button" title="Login de Administrador" aria-label="Login administrativo">
             🔐 Admin
           </button>
         </div>
       </header>
 
+      <!-- Painel de Histórico -->
       <div id="history-panel" class="history-panel">
-        <h3 style="color: var(--dio-yellow); margin-top: 0; text-align: center">
-          📚 Histórico de Conversas
-        </h3>
-        <!-- Histórico será carregado aqui -->
+        <div class="history-header-panel">
+          <h3>📚 Histórico de Conversas</h3>
+          <button id="close-history" class="close-history-btn" aria-label="Fechar histórico">✕</button>
+        </div>
+        <div id="history-content">
+          <!-- Histórico será carregado aqui -->
+        </div>
       </div>
 
+      <!-- Container de Chat -->
       <div id="chat-container">
-        <!-- Mensagens serão inseridas aqui -->
+        <!-- Mensagem de boas-vindas -->
+        <div class="welcome-message">
+          <h2>🧛‍♂️ KONO DIO DA!</h2>
+          <p>Bem-vindo à presença do grande Dio-sama! Como ousa me questionar, mortal?</p>
+          <div class="quick-actions">
+            <button class="quick-action-btn" data-action="clima">🌤️ Ver Clima</button>
+            <button class="quick-action-btn" data-action="hora">🕐 Ver Horário</button>
+            <button class="quick-action-btn" data-action="apresentacao">👋 Apresentação</button>
+          </div>
+        </div>
       </div>
 
+      <!-- Área de Input -->
       <div id="input-container">
-        <input
-          type="text"
-          id="message-input"
-          placeholder="Pergunte ao Dio-sama sobre clima, horário ou qualquer coisa..."
-          maxlength="500"
-          autocomplete="off"
-        />
-        <button id="send-button" title="Enviar mensagem">📤 Enviar</button>
+        <div class="input-wrapper">
+          <input
+            type="text"
+            id="message-input"
+            placeholder="Pergunte ao Dio-sama sobre clima, horário ou qualquer coisa..."
+            maxlength="500"
+            autocomplete="off"
+            aria-label="Digite sua mensagem"
+          />
+          <span class="char-counter">
+            <span id="char-count">0</span>/500
+          </span>
+        </div>
+        <button id="send-button" title="Enviar mensagem (Enter)" aria-label="Enviar mensagem">
+          📤 Enviar
+        </button>
       </div>
 
+      <!-- Toast para notificações -->
+      <div id="toast" class="toast"></div>
+
+      <!-- Footer -->
       <footer>
-        <p>⚡ Poder do Dio-sama: Gemini AI + MongoDB + OpenWeather API ⚡</p>
+        <p>⚡ Poder do Dio-sama: <span class="tech-badge">Gemini AI</span> + <span class="tech-badge">MongoDB</span> + <span class="tech-badge">OpenWeather</span> ⚡</p>
         <p style="font-size: 0.7rem; margin-top: 5px; opacity: 0.7">
           🌤️ Consulte o clima | ⏰ Saiba o horário | 💬 Converse com IA avançada
         </p>
-        <p>
-          Um projeto feito pelas lágrimas de Rhuam7282, junto com o poder do
+        <p class="footer-credit">
+          Um projeto feito pelas lágrimas de <strong>Rhuam7282</strong>, junto com o poder do
           Deepseek e Manus IA
         </p>
       </footer>
+    </div>
+
+    <!-- Modal de Login Admin -->
+    <div id="login-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>🔐 Login do Administrador</h3>
+          <span class="close" aria-label="Fechar modal">&times;</span>
+        </div>
+        <div class="modal-body">
+          <input
+            type="password"
+            id="admin-password"
+            placeholder="Digite a senha de administrador"
+            aria-label="Senha de administrador"
+          />
+          <button id="login-submit" class="modal-btn">Entrar</button>
+          <div id="login-message" role="alert"></div>
+        </div>
+      </div>
     </div>
 
     <script>
@@ -86,22 +142,9 @@
         window.location.hostname === "localhost" ||
         window.location.hostname === "127.0.0.1";
       window.process.env.REACT_APP_BACKEND_URL = isDevelopment
-        ? "http://localhost:7281"
+        ? "http://localhost:3000"
         : "https://aiaiai-ibk2.onrender.com";
     </script>
     <script src="client.js"></script>
-    <div id="login-modal" class="modal">
-      <div class="modal-content">
-        <span class="close">&times;</span>
-        <h3>Login do Administrador</h3>
-        <input
-          type="password"
-          id="admin-password"
-          placeholder="Digite a senha de administrador"
-        />
-        <button id="login-submit">Entrar</button>
-        <div id="login-message"></div>
-      </div>
-    </div>
   </body>
 </html>
