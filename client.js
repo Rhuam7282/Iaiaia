@@ -1,78 +1,108 @@
-// Client.js modificado para não enviar informações de clima na primeira mensagem
+// Client.js melhorado com UX aprimorada
 document.addEventListener("DOMContentLoaded", () => {
+  // Elementos da interface
   const chatContainer = document.getElementById("chat-container");
   const messageInput = document.getElementById("message-input");
   const sendButton = document.getElementById("send-button");
   const resetButton = document.getElementById("reset-button");
   const historyButton = document.getElementById("history-button");
   const historyPanel = document.getElementById("history-panel");
+  const closeHistoryBtn = document.getElementById("close-history");
   const adminLoginButton = document.getElementById("admin-login-button");
   const loginModal = document.getElementById("login-modal");
   const adminPasswordInput = document.getElementById("admin-password");
   const loginSubmitButton = document.getElementById("login-submit");
   const loginCancelButton = document.querySelector(".close");
   const loginMessage = document.getElementById("login-message");
+  const charCountEl = document.getElementById("char-count");
+  const loadingOverlay = document.getElementById("loading-overlay");
+  const toast = document.getElementById("toast");
 
   // Configuração
-  const backendUrl =
-    process.env.REACT_APP_BACKEND_URL || "http://localhost:7281";
+  const backendUrl = process.env.REACT_APP_BACKEND_URL || "http://localhost:3000";
   let currentSessionId = null;
   let chatHistory = [];
   let isFirstMessage = true;
+  let isProcessing = false;
 
-  // Event Listeners para o modal de login
-  adminLoginButton.addEventListener("click", () => {
-    loginModal.style.display = "block";
-  });
+  // --- FUNÇÕES DE UTILIDADE ---
 
-  loginCancelButton.addEventListener("click", () => {
-    loginModal.style.display = "none";
-    adminPasswordInput.value = "";
-    loginMessage.textContent = "";
-  });
+  // Mostrar toast de notificação
+  function showToast(message, type = "info") {
+    toast.textContent = message;
+    toast.className = `toast toast-${type} show`;
+    setTimeout(() => {
+      toast.classList.remove("show");
+    }, 3000);
+  }
 
-  loginSubmitButton.addEventListener("click", async () => {
-    const password = adminPasswordInput.value;
+  // Mostrar/esconder loading overlay
+  function toggleLoading(show) {
+    loadingOverlay.style.display = show ? "flex" : "none";
+  }
 
-    if (!password) {
-      loginMessage.textContent = "Digite a senha!";
-      return;
+  // Validar mensagem
+  function validateMessage(msg) {
+    if (!msg || msg.trim().length === 0) {
+      showToast("Digite uma mensagem!", "warning");
+      return false;
     }
+    if (msg.length > 500) {
+      showToast("Mensagem muito longa! Máximo 500 caracteres.", "error");
+      return false;
+    }
+    return true;
+  }
 
-    try {
-      const response = await fetch(`${backendUrl}/api/admin/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
-      });
+  // Atualizar contador de caracteres
+  messageInput.addEventListener("input", () => {
+    const count = messageInput.value.length;
+    charCountEl.textContent = count;
+    if (count > 450) {
+      charCountEl.style.color = "var(--blood-red)";
+    } else {
+      charCountEl.style.color = "var(--jojo-sand)";
+    }
+  });
 
-      if (response.ok) {
-        const data = await response.json();
-        localStorage.setItem("adminToken", data.token);
-        window.location.href = "/admin.html";
-      } else {
-        const errorData = await response.json();
-        loginMessage.textContent = errorData.error || "Erro no login";
+  // --- AÇÕES RÁPIDAS ---
+  document.querySelectorAll(".quick-action-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const action = btn.dataset.action;
+      let message = "";
+      
+      switch(action) {
+        case "clima":
+          message = "Qual o clima hoje em São Paulo?";
+          break;
+        case "hora":
+          message = "Que horas são agora?";
+          break;
+        case "apresentacao":
+          message = "Quem é você?";
+          break;
       }
-    } catch (error) {
-      console.error("Erro no login:", error);
-      loginMessage.textContent = "Erro ao conectar com o servidor";
-    }
+      
+      messageInput.value = message;
+      messageInput.focus();
+    });
   });
 
-  // Fechar modal ao clicar fora
-  window.addEventListener("click", (e) => {
-    if (e.target === loginModal) {
-      loginModal.style.display = "none";
-      adminPasswordInput.value = "";
-      loginMessage.textContent = "";
-    }
-  });
+  // --- FUNÇÕES DE CHAT ---
 
-  // Funções auxiliares
   function addMessage(text, sender, extraData = null) {
+    // Remover mensagem de boas-vindas na primeira interação
+    const welcomeMsg = document.querySelector(".welcome-message");
+    if (welcomeMsg && sender === "user") {
+      welcomeMsg.remove();
+    }
+
     const msgDiv = document.createElement("div");
     msgDiv.className = `message ${sender}-message`;
+    
+    // Animação de entrada
+    msgDiv.style.opacity = "0";
+    msgDiv.style.transform = "translateY(10px)";
 
     if (sender === "bot" && extraData && !isFirstMessage) {
       let content = text;
@@ -80,7 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // Adicionar informações de clima se disponível
       if (extraData.weatherData) {
         const weather = extraData.weatherData;
-        content += `\n\n🌤️ Informações do Clima - ${weather.cidade}, ${weather.pais}:
+        content += `\n\n🌤️ <strong>Informações do Clima - ${weather.cidade}, ${weather.pais}:</strong>
 📊 Temperatura: ${weather.temperatura}°C (sensação ${weather.sensacao_termica}°C)
 🌦️ Condição: ${weather.descricao}
 💧 Umidade: ${weather.umidade}%
@@ -91,11 +121,8 @@ document.addEventListener("DOMContentLoaded", () => {
 🌅 Nascer do sol: ${weather.nascer_sol}
 🌇 Pôr do sol: ${weather.por_sol}`;
 
-        if (
-          weather.previsao_proximas_horas &&
-          weather.previsao_proximas_horas.length > 0
-        ) {
-          content += `\n\n⏰ Previsão próximas horas:`;
+        if (weather.previsao_proximas_horas && weather.previsao_proximas_horas.length > 0) {
+          content += `\n\n⏰ <strong>Previsão próximas horas:</strong>`;
           weather.previsao_proximas_horas.forEach((hora) => {
             content += `\n${hora.hora}: ${hora.temperatura}°C, ${hora.descricao} (${hora.probabilidade_chuva}% chuva)`;
           });
@@ -105,7 +132,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // Adicionar informações de horário se disponível
       if (extraData.timeData) {
         const time = extraData.timeData;
-        content += `\n\n🕐 Informações de Horário:
+        content += `\n\n🕐 <strong>Informações de Horário:</strong>
 📅 Data completa: ${time.data_completa}
 ⏰ Hora atual: ${time.hora_atual}
 📆 Data: ${time.data_atual}
@@ -118,43 +145,93 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     chatContainer.appendChild(msgDiv);
+    
+    // Animar entrada
+    setTimeout(() => {
+      msgDiv.style.transition = "all 0.3s ease";
+      msgDiv.style.opacity = "1";
+      msgDiv.style.transform = "translateY(0)";
+    }, 10);
+    
     chatContainer.scrollTop = chatContainer.scrollHeight;
   }
 
   async function createNewSession() {
     try {
+      toggleLoading(true);
       const response = await fetch(`${backendUrl}/api/chat/nova-sessao`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
       currentSessionId = data.sessionId;
       chatHistory = [];
-      chatContainer.innerHTML = "";
+      chatContainer.innerHTML = `
+        <div class="welcome-message">
+          <h2>🧛‍♂️ KONO DIO DA!</h2>
+          <p>Bem-vindo à presença do grande Dio-sama! Como ousa me questionar, mortal?</p>
+          <div class="quick-actions">
+            <button class="quick-action-btn" data-action="clima">🌤️ Ver Clima</button>
+            <button class="quick-action-btn" data-action="hora">🕐 Ver Horário</button>
+            <button class="quick-action-btn" data-action="apresentacao">👋 Apresentação</button>
+          </div>
+        </div>
+      `;
       isFirstMessage = true;
+      
+      // Reativar ações rápidas
+      document.querySelectorAll(".quick-action-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const action = btn.dataset.action;
+          let message = "";
+          
+          switch(action) {
+            case "clima":
+              message = "Qual o clima hoje em São Paulo?";
+              break;
+            case "hora":
+              message = "Que horas são agora?";
+              break;
+            case "apresentacao":
+              message = "Quem é você?";
+              break;
+          }
+          
+          messageInput.value = message;
+          messageInput.focus();
+        });
+      });
 
-      // Não mostrar informações de clima/horário na primeira mensagem
-      addMessage(data.message.split("\n")[0], "bot");
+      showToast("Nova conversa iniciada! WRYYY!", "success");
+      toggleLoading(false);
       return data.sessionId;
     } catch (error) {
       console.error("Erro ao criar nova sessão:", error);
-      currentSessionId = `sessao_${Date.now()}_${Math.random()
-        .toString(36)
-        .substr(2, 8)}`;
+      toggleLoading(false);
+      showToast("Erro ao criar nova sessão. Verifique sua conexão!", "error");
+      
+      // Fallback
+      currentSessionId = `sessao_${Date.now()}_${Math.random().toString(36).substr(2, 8)}`;
       chatHistory = [];
-      chatContainer.innerHTML = "";
       isFirstMessage = true;
-      addMessage("WRYYY! Eu sou Dio-sama! Faça sua pergunta, mortal!", "bot");
       return currentSessionId;
     }
   }
 
   async function loadSession(sessionId) {
     try {
-      const response = await fetch(
-        `${backendUrl}/api/chat/historico/${sessionId}`
-      );
+      toggleLoading(true);
+      const response = await fetch(`${backendUrl}/api/chat/historico/${sessionId}`);
+      
+      if (!response.ok) {
+        throw new Error("Erro ao carregar sessão");
+      }
+      
       const data = await response.json();
 
       chatContainer.innerHTML = "";
@@ -168,29 +245,48 @@ document.addEventListener("DOMContentLoaded", () => {
       chatHistory = data.messages || [];
       isFirstMessage = chatHistory.length === 0;
       historyPanel.classList.remove("show");
+      
+      showToast("Conversa carregada!", "success");
+      toggleLoading(false);
     } catch (error) {
       console.error("Erro ao carregar sessão:", error);
-      addMessage("WRYYY! Erro ao carregar sessão!", "error");
+      showToast("Erro ao carregar sessão!", "error");
+      toggleLoading(false);
     }
   }
 
   async function sendMessage() {
     const message = messageInput.value.trim();
-    if (!message) return;
+    
+    if (!validateMessage(message)) return;
+    if (isProcessing) {
+      showToast("Aguarde a resposta anterior!", "warning");
+      return;
+    }
 
     // Se não há sessão atual, criar uma nova
     if (!currentSessionId) {
       await createNewSession();
     }
 
+    isProcessing = true;
+    sendButton.disabled = true;
+    sendButton.textContent = "⏳ Enviando...";
+
     addMessage(message, "user");
     messageInput.value = "";
+    charCountEl.textContent = "0";
 
-    // Mostrar indicador de carregamento
-    const loadingDiv = document.createElement("div");
-    loadingDiv.className = "message bot-message loading";
-    loadingDiv.textContent = "Dio-sama está pensando...";
-    chatContainer.appendChild(loadingDiv);
+    // Mostrar indicador de digitação
+    const typingDiv = document.createElement("div");
+    typingDiv.className = "message bot-message typing-indicator";
+    typingDiv.innerHTML = `
+      <span class="typing-dot"></span>
+      <span class="typing-dot"></span>
+      <span class="typing-dot"></span>
+      <span style="margin-left: 10px;">Dio-sama está pensando...</span>
+    `;
+    chatContainer.appendChild(typingDiv);
     chatContainer.scrollTop = chatContainer.scrollHeight;
 
     try {
@@ -204,10 +300,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }),
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
 
-      // Remover indicador de carregamento
-      chatContainer.removeChild(loadingDiv);
+      // Remover indicador de digitação
+      chatContainer.removeChild(typingDiv);
 
       addMessage(data.response, "bot", {
         weatherData: data.weatherData,
@@ -218,58 +318,67 @@ document.addEventListener("DOMContentLoaded", () => {
       isFirstMessage = false;
     } catch (error) {
       console.error("Erro ao enviar mensagem:", error);
-      chatContainer.removeChild(loadingDiv);
+      chatContainer.removeChild(typingDiv);
       addMessage(
-        "WRYYY! Erro ao contactar Dio-sama! Verifique sua conexão!",
+        "WRYYY! Erro ao contactar Dio-sama! Verifique sua conexão e tente novamente!",
         "error"
       );
+      showToast("Erro de conexão com o servidor!", "error");
+    } finally {
+      isProcessing = false;
+      sendButton.disabled = false;
+      sendButton.textContent = "📤 Enviar";
+      messageInput.focus();
     }
   }
 
   async function resetChat() {
+    if (isProcessing) {
+      showToast("Aguarde o processamento atual!", "warning");
+      return;
+    }
     await createNewSession();
   }
 
   async function showHistory() {
     try {
+      toggleLoading(true);
       const response = await fetch(`${backendUrl}/api/chat/sessoes`);
+      
+      if (!response.ok) {
+        throw new Error("Erro ao carregar histórico");
+      }
+      
       const sessions = await response.json();
+      const historyContent = document.getElementById("history-content");
 
       if (sessions.length === 0) {
-        historyPanel.innerHTML =
-          '<div class="no-history">Nenhum histórico encontrado</div>';
+        historyContent.innerHTML = '<div class="no-history">📭 Nenhum histórico encontrado</div>';
       } else {
-        historyPanel.innerHTML = sessions
+        historyContent.innerHTML = sessions
           .map((session) => {
             const lastMessage =
               session.messages && session.messages.length > 0
-                ? session.messages[
-                    session.messages.length - 1
-                  ].parts[0].text.substring(0, 50)
+                ? session.messages[session.messages.length - 1].parts[0].text.substring(0, 50)
                 : "Nova conversa";
 
             return `
-                    <div class="history-item" data-id="${session.sessionId}">
-                      <div class="history-header">
-                        <small>${new Date(session.lastUpdated).toLocaleString(
-                          "pt-BR"
-                        )}</small>
-                        <button class="delete-session" data-id="${
-                          session.sessionId
-                        }">🗑️</button>
-                      </div>
-                      <p>${lastMessage}${
-              lastMessage.length >= 50 ? "..." : ""
-            }</p>
-                    </div>
-                  `;
+              <div class="history-item" data-id="${session.sessionId}">
+                <div class="history-header">
+                  <small>📅 ${new Date(session.lastUpdated).toLocaleString("pt-BR")}</small>
+                  <button class="delete-session" data-id="${session.sessionId}" title="Deletar conversa">🗑️</button>
+                </div>
+                <p>${lastMessage}${lastMessage.length >= 50 ? "..." : ""}</p>
+              </div>
+            `;
           })
           .join("");
       }
 
-      historyPanel.classList.toggle("show");
+      historyPanel.classList.add("show");
+      toggleLoading(false);
 
-      // Adicionar event listeners para carregar sessões
+      // Event listeners para carregar sessões
       document.querySelectorAll(".history-item").forEach((item) => {
         item.addEventListener("click", (e) => {
           if (!e.target.classList.contains("delete-session")) {
@@ -278,41 +387,46 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       });
 
-      // Adicionar event listeners para deletar sessões
+      // Event listeners para deletar sessões
       document.querySelectorAll(".delete-session").forEach((button) => {
         button.addEventListener("click", async (e) => {
           e.stopPropagation();
           const sessionId = button.dataset.id;
 
-          if (confirm("Tem certeza que deseja deletar esta sessão?")) {
+          if (confirm("Tem certeza que deseja deletar esta conversa?")) {
             try {
-              await fetch(`${backendUrl}/api/chat/sessao/${sessionId}`, {
+              const deleteResponse = await fetch(`${backendUrl}/api/chat/sessao/${sessionId}`, {
                 method: "DELETE",
               });
 
-              // Remover da interface
-              button.closest(".history-item").remove();
+              if (deleteResponse.ok) {
+                button.closest(".history-item").remove();
+                showToast("Conversa deletada!", "success");
 
-              // Se a sessão deletada é a atual, criar uma nova
-              if (sessionId === currentSessionId) {
-                await createNewSession();
+                if (sessionId === currentSessionId) {
+                  await createNewSession();
+                }
+              } else {
+                throw new Error("Erro ao deletar");
               }
             } catch (error) {
               console.error("Erro ao deletar sessão:", error);
-              alert("Erro ao deletar sessão");
+              showToast("Erro ao deletar sessão!", "error");
             }
           }
         });
       });
     } catch (error) {
       console.error("Erro ao carregar histórico:", error);
-      historyPanel.innerHTML =
-        '<div class="error">Erro ao carregar histórico</div>';
+      const historyContent = document.getElementById("history-content");
+      historyContent.innerHTML = '<div class="error">❌ Erro ao carregar histórico</div>';
       historyPanel.classList.add("show");
+      toggleLoading(false);
+      showToast("Erro ao carregar histórico!", "error");
     }
   }
 
-  // Função para testar conexão com o backend
+  // Testar conexão com o backend
   async function testConnection() {
     try {
       const response = await fetch(`${backendUrl}/api/horario`);
@@ -322,18 +436,19 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     } catch (error) {
       console.error("❌ Erro de conexão com backend:", error);
-      addMessage(
-        "⚠️ Erro de conexão com o servidor. Verifique se o backend está rodando.",
-        "error"
-      );
+      showToast("⚠️ Erro de conexão com o servidor!", "error");
       return false;
     }
   }
 
-  // Event Listeners
+  // --- EVENT LISTENERS ---
+
   sendButton.addEventListener("click", sendMessage);
   resetButton.addEventListener("click", resetChat);
   historyButton.addEventListener("click", showHistory);
+  closeHistoryBtn.addEventListener("click", () => {
+    historyPanel.classList.remove("show");
+  });
 
   messageInput.addEventListener("keypress", (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -349,10 +464,86 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Inicialização
+  // --- MODAL DE LOGIN ADMIN ---
+
+  adminLoginButton.addEventListener("click", () => {
+    loginModal.style.display = "block";
+    adminPasswordInput.focus();
+  });
+
+  loginCancelButton.addEventListener("click", () => {
+    loginModal.style.display = "none";
+    adminPasswordInput.value = "";
+    loginMessage.textContent = "";
+  });
+
+  loginSubmitButton.addEventListener("click", async () => {
+    const password = adminPasswordInput.value;
+
+    if (!password) {
+      loginMessage.textContent = "Digite a senha!";
+      loginMessage.style.color = "var(--blood-red)";
+      return;
+    }
+
+    try {
+      loginSubmitButton.disabled = true;
+      loginSubmitButton.textContent = "Verificando...";
+
+      const response = await fetch(`${backendUrl}/api/admin/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem("adminToken", data.token);
+        showToast("Login bem-sucedido! WRYYY!", "success");
+        setTimeout(() => {
+          window.location.href = "/admin.html";
+        }, 500);
+      } else {
+        const errorData = await response.json();
+        loginMessage.textContent = errorData.error || "Senha incorreta!";
+        loginMessage.style.color = "var(--blood-red)";
+      }
+    } catch (error) {
+      console.error("Erro no login:", error);
+      loginMessage.textContent = "Erro ao conectar com o servidor";
+      loginMessage.style.color = "var(--blood-red)";
+    } finally {
+      loginSubmitButton.disabled = false;
+      loginSubmitButton.textContent = "Entrar";
+    }
+  });
+
+  // Enter no campo de senha
+  adminPasswordInput.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+      loginSubmitButton.click();
+    }
+  });
+
+  // Fechar modal ao clicar fora
+  window.addEventListener("click", (e) => {
+    if (e.target === loginModal) {
+      loginModal.style.display = "none";
+      adminPasswordInput.value = "";
+      loginMessage.textContent = "";
+    }
+  });
+
+  // --- INICIALIZAÇÃO ---
   async function init() {
-    await testConnection();
-    await createNewSession();
+    toggleLoading(true);
+    const connected = await testConnection();
+    if (connected) {
+      await createNewSession();
+      showToast("Bem-vindo ao poder do Dio-sama! WRYYY!", "success");
+    }
+    toggleLoading(false);
+    messageInput.focus();
   }
 
   init();
