@@ -506,3 +506,452 @@ footer p {
     color: var(--dio-yellow);
     font-weight: bold;
 }
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid var(--shadow-dark);
+  border-top: 5px solid var(--dio-yellow);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-overlay p {
+  margin-top: 20px;
+  color: var(--dio-yellow);
+  font-size: 1.2rem;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+/* Toast Notifications */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 15px 20px;
+  background: linear-gradient(135deg, var(--dark-red), var(--blood-red));
+  color: var(--text-light);
+  border: 2px solid var(--dio-yellow);
+  border-radius: 5px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.3s ease;
+  z-index: 10000;
+  max-width: 300px;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast-success {
+  background: linear-gradient(135deg, #2d5016, #4a7c2c);
+  border-color: #7fc94a;
+}
+
+.toast-error {
+  background: linear-gradient(135deg, #5e0000, #8a0303);
+  border-color: #ff4444;
+}
+
+.toast-warning {
+  background: linear-gradient(135deg, #8b6914, #daa520);
+  border-color: var(--dio-yellow);
+}
+
+/* Melhorias no Header */
+.subtitle {
+  color: var(--jojo-sand);
+  font-size: 0.9rem;
+  margin: 5px 0 15px 0;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  font-style: italic;
+}
+
+.title-icon {
+  display: inline-block;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* Mensagem de Boas-Vindas */
+.welcome-message {
+  background: linear-gradient(135deg, var(--dark-red), var(--blood-red));
+  border: 3px solid var(--dio-yellow);
+  padding: 30px;
+  margin: 20px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+  animation: fadeInScale 0.5s ease;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.welcome-message h2 {
+  color: var(--dio-yellow);
+  margin: 0 0 15px 0;
+  font-size: 2rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+.welcome-message p {
+  color: var(--text-light);
+  font-size: 1.1rem;
+  margin-bottom: 20px;
+}
+
+/* Ações Rápidas */
+.quick-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.quick-action-btn {
+  background: linear-gradient(to bottom, var(--dio-gold), var(--dio-yellow));
+  color: var(--dark-red);
+  border: 2px solid var(--shadow-dark);
+  padding: 10px 15px;
+  font-weight: bold;
+  font-size: 0.85rem;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: all 0.2s ease;
+  box-shadow: 0 3px 0 var(--shadow-dark);
+}
+
+.quick-action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 0 var(--shadow-dark);
+}
+
+.quick-action-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 0 var(--shadow-dark);
+}
+
+/* Input Wrapper com Contador */
+.input-wrapper {
+  flex: 1;
+  position: relative;
+}
+
+.char-counter {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.75rem;
+  color: var(--jojo-sand);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+#message-input {
+  width: 100%;
+  padding-right: 60px;
+}
+
+/* Indicador de Digitação */
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  padding: 15px !important;
+}
+
+.typing-dot {
+  width: 8px;
+  height: 8px;
+  margin: 0 2px;
+  background-color: var(--dio-yellow);
+  border-radius: 50%;
+  display: inline-block;
+  animation: typing 1.4s infinite;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typing {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.7;
+  }
+  30% {
+    transform: translateY(-10px);
+    opacity: 1;
+  }
+}
+
+/* Melhorias no Painel de Histórico */
+.history-header-panel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--dio-yellow);
+  margin-bottom: 15px;
+}
+
+.close-history-btn {
+  background: transparent;
+  color: var(--dio-yellow);
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  box-shadow: none;
+}
+
+.close-history-btn:hover {
+  background: rgba(255, 215, 0, 0.2);
+  transform: rotate(90deg);
+}
+
+#history-content {
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+}
+
+/* Scrollbar personalizada */
+#history-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+#history-content::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+#history-content::-webkit-scrollbar-thumb {
+  background: var(--dio-gold);
+  border-radius: 4px;
+}
+
+#history-content::-webkit-scrollbar-thumb:hover {
+  background: var(--dio-yellow);
+}
+
+/* Melhorias no Modal */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.modal-header h3 {
+  margin: 0;
+}
+
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.modal-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(to bottom, var(--dio-gold), var(--dio-yellow));
+  color: var(--dark-red);
+  border: 2px solid var(--shadow-dark);
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: all 0.2s ease;
+}
+
+.modal-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.modal-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Tech Badges no Footer */
+.tech-badge {
+  background: rgba(255, 215, 0, 0.2);
+  padding: 2px 8px;
+  border-radius: 3px;
+  color: var(--dio-yellow);
+  font-weight: bold;
+  border: 1px solid var(--dio-gold);
+}
+
+.footer-credit {
+  margin-top: 10px;
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+.footer-credit strong {
+  color: var(--dio-yellow);
+}
+
+/* Melhorias de Acessibilidade */
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--dio-yellow);
+  outline-offset: 2px;
+}
+
+/* Transições suaves em elementos interativos */
+.history-item,
+.quick-action-btn,
+button,
+input {
+  transition: all 0.2s ease;
+}
+
+/* Estado desabilitado para botões */
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Efeito de hover melhorado para itens de histórico */
+.history-item:hover {
+  background-color: rgba(139, 0, 0, 0.5);
+  transform: translateX(-5px);
+  box-shadow: 5px 0 0 var(--dio-yellow);
+}
+
+/* Animação para mensagens de erro */
+.error-message {
+  animation: shake 0.5s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+
+/* Responsividade melhorada */
+@media (max-width: 768px) {
+  .welcome-message {
+    padding: 20px;
+    margin: 10px;
+  }
+  
+  .welcome-message h2 {
+    font-size: 1.5rem;
+  }
+  
+  .quick-actions {
+    flex-direction: column;
+  }
+  
+  .quick-action-btn {
+    width: 100%;
+  }
+  
+  .toast {
+    bottom: 10px;
+    right: 10px;
+    left: 10px;
+    max-width: none;
+  }
+  
+  .char-counter {
+    font-size: 0.65rem;
+    right: 5px;
+  }
+}
+
+/* Efeito de foco melhorado para inputs */
+#message-input:focus {
+  border-color: var(--dio-yellow);
+  box-shadow: 
+    inset 2px 2px 5px rgba(0, 0, 0, 0.2),
+    0 0 15px rgba(255, 215, 0, 0.3);
+}
+
+/* Animação de entrada para o histórico */
+.history-item {
+  animation: slideInRight 0.3s ease;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Melhorias visuais para mensagens do bot */
+.bot-message strong {
+  color: var(--dio-yellow);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  font-weight: 700;
+}
+
+/* Estado de loading para botões */
+button.loading::after {
+  content: "";
+  width: 12px;
+  height: 12px;
+  margin-left: 8px;
+  border: 2px solid var(--dark-red);
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  display: inline-block;
+  animation: spin 0.8s linear infinite;
+}
